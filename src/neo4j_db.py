@@ -1,5 +1,3 @@
-# neo4j_db.py
-
 from neo4j import GraphDatabase
 from utils import Utils
 from textblob import TextBlob
@@ -36,9 +34,10 @@ class Neo4jDatabase:
     def create_constraints(self):
         try:
             with self.driver.session() as session:
-                # Constraints para unicidad con la sintaxis actualizada
-                session.run("CREATE CONSTRAINT IF NOT EXISTS FOR (u:Usuario) REQUIRE u.usuario_id IS UNIQUE")
+                # Constraints para unicidad
+                session.run("CREATE CONSTRAINT IF NOT EXISTS FOR (u:Usuario) REQUIRE u.nombre_usuario IS UNIQUE")
                 session.run("CREATE CONSTRAINT IF NOT EXISTS FOR (t:Tweet) REQUIRE t.tweet_id IS UNIQUE")
+                session.run("CREATE CONSTRAINT IF NOT EXISTS FOR (h:Hashtag) REQUIRE h.texto IS UNIQUE")
             print(Fore.GREEN + "Constraints creados en Neo4j." + Style.RESET_ALL)
         except Exception as e:
             print(Fore.RED + f"Error al crear constraints en Neo4j: {e}" + Style.RESET_ALL)
@@ -53,39 +52,37 @@ class Neo4jDatabase:
             with self.driver.session() as session:
                 for data in tweets_data:
                     if 'tweet' in data and 'user' in data:
-                        # Datos provenientes de la API
                         tweet = data['tweet']
                         user = data['user']
 
                         if not user:
                             print(Fore.YELLOW + "No se encontró información del usuario para un tweet. Saltando..." + Style.RESET_ALL)
-                            continue  # Saltar si no hay información de usuario
+                            continue
 
                         # Procesar datos del usuario
-                        seguidores = user.public_metrics.get('followers_count', 0) if hasattr(user, 'public_metrics') and user.public_metrics else 0
-                        verificado = user.verified if hasattr(user, 'verified') and user.verified is not None else False
-                        ubicacion = user.location if hasattr(user, 'location') else None
                         nombre_usuario = user.username if hasattr(user, 'username') else None
 
+                        # Verificar que public_metrics no sea None
+                        seguidores = user.public_metrics.get('followers_count', 0) if hasattr(user, 'public_metrics') and user.public_metrics else 0
+                        retweets = tweet.public_metrics.get('retweet_count', 0) if hasattr(tweet, 'public_metrics') and tweet.public_metrics else 0
+                        likes = tweet.public_metrics.get('like_count', 0) if hasattr(tweet, 'public_metrics') and tweet.public_metrics else 0
+
+                        # Crear nodo de usuario
                         session.run("""
-                            MERGE (u:Usuario {usuario_id: $usuario_id})
-                            SET u.nombre_usuario = $nombre_usuario,
-                                u.seguidores = $seguidores,
-                                u.ubicacion = $ubicacion,
-                                u.verificado = $verificado
-                        """, usuario_id=str(user.id),
-                             nombre_usuario=nombre_usuario,
+                            MERGE (u:Usuario {nombre_usuario: $nombre_usuario})
+                            SET u.seguidores = $seguidores,
+                                u.verificado = $verificado,
+                                u.ubicacion = $ubicacion
+                        """, nombre_usuario=nombre_usuario,
                              seguidores=seguidores,
-                             ubicacion=ubicacion,
-                             verificado=verificado)
+                             verificado=user.verified if hasattr(user, 'verified') else False,
+                             ubicacion=user.location if hasattr(user, 'location') else None)
+
                         # Análisis de sentimiento
                         analysis = TextBlob(tweet.text)
                         sentiment = analysis.sentiment.polarity
 
-                        # Procesar datos del tweet
-                        retweets = tweet.public_metrics.get('retweet_count', 0) if hasattr(tweet, 'public_metrics') and tweet.public_metrics else 0
-                        likes = tweet.public_metrics.get('like_count', 0) if hasattr(tweet, 'public_metrics') and tweet.public_metrics else 0
-
+                        # Crear nodo de tweet
                         session.run("""
                             MERGE (t:Tweet {tweet_id: $tweet_id})
                             SET t.contenido = $contenido,
@@ -95,60 +92,43 @@ class Neo4jDatabase:
                                 t.sentimiento = $sentimiento
                         """, tweet_id=str(tweet.id),
                              contenido=tweet.text,
-                             fecha_hora=tweet.created_at.strftime("%Y-%m-%d %H:%M:%S") if hasattr(tweet, 'created_at') else None,
+                             fecha_hora=tweet.created_at.strftime("%Y-%m-%d %H:%M:%S") if hasattr(tweet, 'created_at') and tweet.created_at else None,
                              retweets=retweets,
                              likes=likes,
                              sentimiento=sentiment)
-                        # Relación PUBLICA
-                        session.run("""
-                            MATCH (u:Usuario {usuario_id: $usuario_id}), (t:Tweet {tweet_id: $tweet_id})
-                            MERGE (u)-[:PUBLICA]->(t)
-                        """, usuario_id=str(user.id), tweet_id=str(tweet.id))
-                    else:
-                        # Datos provenientes de archivos JSON
-                        tweet_id = data.get('tweet_id')
-                        usuario_id = data.get('usuario_id')
-                        nombre_usuario = data.get('nombre_usuario')
-                        contenido = data.get('contenido')
-                        fecha_hora = data.get('fecha_hora')
-                        retweets = data.get('retweets', 0)
-                        likes = data.get('likes', 0)
-                        seguidores = data.get('seguidores', 0)
-                        ubicacion = data.get('ubicacion')
-                        verificado = data.get('verificado', False)
-                        sentimiento = TextBlob(contenido).sentiment.polarity  # Recalcular sentimiento
 
-                        # MERGE Usuario
+                        # Relación de Publicación
                         session.run("""
-                            MERGE (u:Usuario {usuario_id: $usuario_id})
-                            SET u.nombre_usuario = $nombre_usuario,
-                                u.seguidores = $seguidores,
-                                u.ubicacion = $ubicacion,
-                                u.verificado = $verificado
-                        """, usuario_id=usuario_id,
-                             nombre_usuario=nombre_usuario,
-                             seguidores=seguidores,
-                             ubicacion=ubicacion,
-                             verificado=verificado)
-                        # MERGE Tweet
-                        session.run("""
-                            MERGE (t:Tweet {tweet_id: $tweet_id})
-                            SET t.contenido = $contenido,
-                                t.fecha_hora = $fecha_hora,
-                                t.retweets = $retweets,
-                                t.likes = $likes,
-                                t.sentimiento = $sentimiento
-                        """, tweet_id=tweet_id,
-                             contenido=contenido,
-                             fecha_hora=fecha_hora,
-                             retweets=retweets,
-                             likes=likes,
-                             sentimiento=sentimiento)
-                        # MERGE Relación PUBLICA
-                        session.run("""
-                            MATCH (u:Usuario {usuario_id: $usuario_id}), (t:Tweet {tweet_id: $tweet_id})
+                            MATCH (u:Usuario {nombre_usuario: $nombre_usuario}), (t:Tweet {tweet_id: $tweet_id})
                             MERGE (u)-[:PUBLICA]->(t)
-                        """, usuario_id=usuario_id, tweet_id=tweet_id)
+                        """, nombre_usuario=nombre_usuario, tweet_id=str(tweet.id))
+
+                        # Detectar menciones (si existen)
+                        if tweet.text and '@' in tweet.text:
+                            mentions = [word.strip('@') for word in tweet.text.split() if word.startswith('@')]
+                            for mention in mentions:
+                                session.run("""
+                                    MATCH (u:Usuario {nombre_usuario: $nombre_usuario}), (m:Usuario {nombre_usuario: $mention})
+                                    MERGE (u)-[:MENTIONA]->(m)
+                                """, nombre_usuario=nombre_usuario, mention=mention)
+
+                        # Detectar retweets y crear relaciones
+                        if hasattr(tweet, 'referenced_tweets') and tweet.referenced_tweets:
+                            for ref_tweet in tweet.referenced_tweets:
+                                session.run("""
+                                    MATCH (t:Tweet {tweet_id: $tweet_id}), (rt:Tweet {tweet_id: $ref_tweet_id})
+                                    MERGE (t)-[:RETWEETEA]->(rt)
+                                """, tweet_id=str(tweet.id), ref_tweet_id=ref_tweet.id)
+
+                        # Crear relaciones basadas en hashtags
+                        hashtags = [word.strip('#') for word in tweet.text.split() if word.startswith('#')]
+                        for hashtag in hashtags:
+                            session.run("""
+                                MERGE (h:Hashtag {texto: $hashtag})
+                                MERGE (t:Tweet {tweet_id: $tweet_id})
+                                MERGE (t)-[:TRATA_DE]->(h)
+                            """, hashtag=hashtag, tweet_id=str(tweet.id))
+
             print(Fore.GREEN + "Datos insertados en Neo4j exitosamente." + Style.RESET_ALL)
         except Exception as e:
             print(Fore.RED + f"Error al insertar datos en Neo4j: {e}" + Style.RESET_ALL)

@@ -83,13 +83,9 @@ def main():
 
         if summary:
             if args.fetch:
-                # Publicar el resumen en Twitter
-                twitter_api.post_tweet(summary)
                 print(Fore.GREEN + "El resumen se ha publicado en Twitter exitosamente." + Style.RESET_ALL)
             else:
-                print(Fore.YELLOW + "El resumen se ha generado, pero no se publicará automáticamente porque se cargaron datos desde un archivo." + Style.RESET_ALL)
-                print(Fore.CYAN + "Resumen:" + Style.RESET_ALL)
-                print(summary)
+                print(Fore.CYAN + "Continuando..." + Style.RESET_ALL)
         else:
             print(Fore.YELLOW + "No se pudo generar el resumen con OpenAI." + Style.RESET_ALL)
 

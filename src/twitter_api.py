@@ -107,15 +107,6 @@ class TwitterAPI:
                     break
         return tweets_data
 
-    def post_tweet(self, text):
-        try:
-            # Publicar el tweet
-            self.api_v1.update_status(status=text)
-            print(Fore.GREEN + "Tweet publicado exitosamente." + Style.RESET_ALL)
-        except Exception as e:
-            print(Fore.RED + f"Error al publicar el tweet: {e}" + Style.RESET_ALL)
-            traceback.print_exc()
-
     def close_connection(self):
         # No es necesario cerrar conexiones explícitamente
         pass

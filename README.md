@@ -153,12 +153,12 @@ Con las dependencias instaladas y las claves configuradas, puedes proceder a eje
 
 ```bash
 # Ejecuta el script de análisis
+
+
 python main.py --fetch
 ```
 
-O si ya tienes un archivo JSON con datos de tweets
-
-:
+O si ya tienes un archivo JSON con datos de tweets:
 
 ```bash
 # Cargar tweets desde un archivo JSON
@@ -178,6 +178,20 @@ El análisis generado incluye:
 - **Tendencias Temporales**: Análisis de la evolución de los temas de conversación a lo largo del tiempo.
 
 Además, se genera un **resumen de los datos utilizando OpenAI**, el cual puede ser publicado en Twitter si se ejecuta en el modo de recolección (`--fetch`).
+
+## ⚠️ **Limitaciones del Proyecto**
+
+Aunque el proyecto es robusto y útil para muchos análisis, presenta algunas limitaciones:
+
+1. **Limitaciones de la API de Twitter**: La **API de Twitter** tiene restricciones de tasa y limitaciones en cuanto a los datos que se pueden acceder. Esto puede afectar la cantidad de tweets que se pueden recolectar en un período determinado.
+   
+2. **Calidad del Análisis de Sentimientos**: El **análisis de sentimiento** realizado con **TextBlob** es efectivo para análisis generales, pero puede no capturar matices complejos del lenguaje humano, como ironías o sarcasmos, lo que puede afectar la precisión de los resultados.
+
+3. **Dependencia de Variables Externas**: El proyecto depende de servicios externos como **Twitter API** y **OpenAI API**. La disponibilidad y los cambios en estos servicios pueden afectar el funcionamiento del proyecto.
+
+4. **Escalabilidad**: A medida que la cantidad de datos crezca, especialmente en entornos de producción con grandes volúmenes de tweets, puede ser necesario optimizar las bases de datos o emplear soluciones más escalables.
+
+5. **Complejidad del Modelo de Grafos**: El **modelo de grafos** puede ser complejo para usuarios sin experiencia en teoría de grafos o en consultas de Neo4j. Se requiere familiaridad con el lenguaje **Cypher** para realizar consultas y análisis avanzados.
 
 ## 🧩 **Resumen**
 
