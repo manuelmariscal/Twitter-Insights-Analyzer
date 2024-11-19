@@ -427,5 +427,70 @@
         "ubicacion": null,
         "verificado": null,
         "lang": "en"
+    },
+    {
+        "tweet_id": "1858670204068245976",
+        "usuario_id": "1841988608825466880",
+        "nombre_usuario": "america",
+        "contenido": "RT @elonmusk: Enough is enough",
+        "fecha_hora": "2024-11-19T00:34:43+00:00",
+        "retweets": 15476,
+        "likes": 0,
+        "seguidores": 0,
+        "ubicacion": null,
+        "verificado": null,
+        "lang": "en"
+    },
+    {
+        "tweet_id": "1858667318332555653",
+        "usuario_id": "1841988608825466880",
+        "nombre_usuario": "america",
+        "contenido": "https://t.co/VjXB9MP0QW",
+        "fecha_hora": "2024-11-19T00:23:15+00:00",
+        "retweets": 33,
+        "likes": 264,
+        "seguidores": 0,
+        "ubicacion": null,
+        "verificado": null,
+        "lang": "zxx"
+    },
+    {
+        "tweet_id": "1858667315086184545",
+        "usuario_id": "1841988608825466880",
+        "nombre_usuario": "america",
+        "contenido": "Manhattan District Attorney Alvin Bragg downgraded 60% of felony cases last year, including violent crimes\n\nNew Yorkers don’t feel safe in their own city\n\nMeanwhile, in Trump’s case, he elevated 34 charges to felonies\n\nIt’s time for DAs that prioritize public safety over politics https://t.co/y9G7E6somj",
+        "fecha_hora": "2024-11-19T00:23:14+00:00",
+        "retweets": 572,
+        "likes": 2199,
+        "seguidores": 0,
+        "ubicacion": null,
+        "verificado": null,
+        "lang": "en"
+    },
+    {
+        "tweet_id": "1858636023250464997",
+        "usuario_id": "1841988608825466880",
+        "nombre_usuario": "america",
+        "contenido": "https://t.co/Z5CwKEXUGK",
+        "fecha_hora": "2024-11-18T22:18:54+00:00",
+        "retweets": 134,
+        "likes": 715,
+        "seguidores": 0,
+        "ubicacion": null,
+        "verificado": null,
+        "lang": "zxx"
+    },
+    {
+        "tweet_id": "1858636018825728310",
+        "usuario_id": "1841988608825466880",
+        "nombre_usuario": "america",
+        "contenido": "A man with eight previous arrests in New York City alone went on an unprovoked stabbing spree that left two men dead and a woman in critical condition.\n\nThe justice system is failing to protect the people.\n\nAmericans deserve safe cities. https://t.co/Hl3AIWFfc5",
+        "fecha_hora": "2024-11-18T22:18:53+00:00",
+        "retweets": 2218,
+        "likes": 7150,
+        "seguidores": 0,
+        "ubicacion": null,
+        "verificado": null,
+        "lang": "en"
     }
 ]
