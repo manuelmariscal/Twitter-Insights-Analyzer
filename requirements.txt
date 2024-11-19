@@ -1,0 +1,7 @@
+tweepy
+neo4j
+textblob
+colorama
+python-dotenv
+openai
+requests-oauthlib
